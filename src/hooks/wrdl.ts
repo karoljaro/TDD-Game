@@ -8,19 +8,23 @@ import { LetterValidationState } from '../types/enums';
  */
 
 export const scoreGuess = (guess: string, answer: string): string[] => {
+  const answerLetter = answer.split('');
   
   const score: string[] = [];
 
-  for (let letterIndex = 0; letterIndex < guess.length; letterIndex++) {
-    if (guess[letterIndex] === answer[letterIndex]) {
+  for (let letterIndex = 0; letterIndex < guess['length']; letterIndex++) {
+    if (guess[letterIndex] === answerLetter[letterIndex]) {
       score[letterIndex] = LetterValidationState.Correct;
+      answerLetter[letterIndex] = '-';
 
-    } else if (answer.includes(guess[letterIndex])) {
+    } else if (answerLetter.includes(guess[letterIndex])) {
       score[letterIndex] = LetterValidationState.Almost;
 
+      const answerIdx = answerLetter.findIndex((char) => char === guess[letterIndex]);
+      answerLetter[answerIdx] = '-';
+      
     } else {
       score[letterIndex] = LetterValidationState.Incorrect;
-      
     }
   }
 
