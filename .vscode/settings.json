@@ -1,0 +1,5 @@
+{
+    "javascript.preferences.jsxAttributeCompletionStyle": "braces",
+    "typescript.preferences.jsxAttributeCompletionStyle": "braces",
+    "prettier.jsxSingleQuote": true,
+}
