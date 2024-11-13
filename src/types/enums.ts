@@ -5,6 +5,7 @@
  * - `LetterValidationState.Correct` ("C"): Letter is in the word and in the correct spot.
  * - `LetterValidationState.Incorrect` ("I"): Letter is not in the word in any spot.
  * - `LetterValidationState.Almost` ("A"): Letter is in the word but in the wrong spot.
+ * - `LetterValidationState.Empty` ("-"): The letter in the word was guessed in the right place and the algorithm did not take it into account later.
  */
 export enum LetterValidationState {
   /**
@@ -24,4 +25,10 @@ export enum LetterValidationState {
    * @type {string}
    */
   Almost = 'A',
+
+  /**
+   * Returns a grade for a letter that is correct in a word and replaces the correct letter with that character to protect against errors
+   * @type {string}
+   */
+  Empty = '-'
 }
