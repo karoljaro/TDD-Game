@@ -14,6 +14,14 @@ describe('scoreGuess', () => {
     expect(Wrdl.scoreGuess('bx', 'ab')).toEqual(['A', 'I']);
   });
 
+  it('matches letters only once', () => {
+    expect(Wrdl.scoreGuess('cczy', 'abcd')).toEqual(['A', 'I', 'I', 'I']);
+  })
+
+  it('matches correct letters first', () => {
+    expect(Wrdl.scoreGuess('zdyd', 'abcd')).toEqual(['I', 'I', 'I', 'C']);
+  })
+
   it.each([
     // no duplications in answer, duplications in guess
     ['zyxx', 'abcd', 'IIII'],

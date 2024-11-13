@@ -1,28 +1,40 @@
-import { LetterValidationState } from '../types/enums';
+import { LetterValidationState } from "@/types/enums";
+
+export type LetterScore_TYPE = Exclude<`${LetterValidationState}`, `${LetterValidationState.Empty}`>;
+export type GuessScore = LetterScore_TYPE[];
 
 /**
- * Validate letters of word 
+ * Validate letters of word
  * @param guess - The word or letters that the player enters.
  * @param answer - The right word.
- * @returns {string[]} Return Array sting where we will have a letter state of word
+ * @returns {GuessScore} Return Array sting where we will have a letter state of word
  */
 
-export const scoreGuess = (guess: string, answer: string): string[] => {
-  const answerLetter = answer.split('');
-  
-  const score: string[] = [];
+export const scoreGuess = (guess: string, answer: string): GuessScore => {
+  const answerLetters = answer.split('');
+  const guessLetters = guess.split('');
 
-  for (let letterIndex = 0; letterIndex < guess['length']; letterIndex++) {
-    if (guess[letterIndex] === answerLetter[letterIndex]) {
+  const score: GuessScore = [];
+
+  for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
+    if (guessLetters[letterIndex] === answerLetters[letterIndex]) {
       score[letterIndex] = LetterValidationState.Correct;
-      answerLetter[letterIndex] = '-';
+      answerLetters[letterIndex] = LetterValidationState.Empty;
+      guessLetters[letterIndex] = LetterValidationState.Empty;
+    }
+  }
 
-    } else if (answerLetter.includes(guess[letterIndex])) {
+  for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
+    if (guessLetters[letterIndex] === LetterValidationState.Empty) continue;
+
+    const answerIdx = answerLetters.findIndex(
+      (char) => char === guessLetters[letterIndex],
+    );
+
+    if (answerIdx > -1) {
       score[letterIndex] = LetterValidationState.Almost;
 
-      const answerIdx = answerLetter.findIndex((char) => char === guess[letterIndex]);
-      answerLetter[answerIdx] = '-';
-      
+      answerLetters[answerIdx] = LetterValidationState.Empty;
     } else {
       score[letterIndex] = LetterValidationState.Incorrect;
     }
