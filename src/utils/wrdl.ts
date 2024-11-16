@@ -1,28 +1,32 @@
+import { getRandomNumber } from '@/helpers/randomNumber';
+import { words } from '@/models/exampleOfwords';
 import { LetterValidationState } from '@/types/enums';
 
 export type LetterScore_TYPE = Exclude<`${LetterValidationState}`, `${LetterValidationState.Empty}`>;
 export type GuessScore = LetterScore_TYPE[];
 
 export type Game = {
-  answer: string;
-  hardMode: boolean;
-  guesses: string[];
-  scores: GuessScore[];
-  guessesRemaining: number;
-  dictionary: string[];
-  maxWordLength: number;
+    answer: string;
+    hardMode: boolean;
+    guesses: string[];
+    scores: GuessScore[];
+    guessesRemaining: number;
+    dictionary: string[];
+    maxWordLength: number;
 };
 
-export const createGame = (dictionary: string[], answer: string, hardMode = false): Game => {
-  return {
-    answer,
-    hardMode,
-    guesses: [],
-    scores: [],
-    guessesRemaining: 6,
-    dictionary,
-    maxWordLength: 4,
-  };
+export const getWord = () => words[getRandomNumber(0, words.length - 1)];
+
+export const createGame = (dictionary: string[] = words, answer: string = getWord(), hardMode = false): Game => {
+    return {
+        answer,
+        hardMode,
+        guesses: [],
+        scores: [],
+        guessesRemaining: 6,
+        dictionary,
+        maxWordLength: 4,
+    };
 };
 
 /**
@@ -33,63 +37,66 @@ export const createGame = (dictionary: string[], answer: string, hardMode = fals
  */
 
 export const scoreGuess = (guess: string, answer: string): GuessScore => {
-  const answerLetters = answer.split('');
-  const guessLetters = guess.split('');
+    const answerLetters = answer.split('');
+    const guessLetters = guess.split('');
 
-  const score: GuessScore = [];
+    const score: GuessScore = [];
 
-  for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
-    if (guessLetters[letterIndex] === answerLetters[letterIndex]) {
-      score[letterIndex] = LetterValidationState.Correct;
-      answerLetters[letterIndex] = LetterValidationState.Empty;
-      guessLetters[letterIndex] = LetterValidationState.Empty;
+    for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
+        if (guessLetters[letterIndex] === answerLetters[letterIndex]) {
+            score[letterIndex] = LetterValidationState.Correct;
+            answerLetters[letterIndex] = LetterValidationState.Empty;
+            guessLetters[letterIndex] = LetterValidationState.Empty;
+        }
     }
-  }
 
-  for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
-    if (guessLetters[letterIndex] === LetterValidationState.Empty) continue;
+    for (let letterIndex = 0; letterIndex < guessLetters['length']; letterIndex++) {
+        if (guessLetters[letterIndex] === LetterValidationState.Empty) continue;
 
-    const answerIdx = answerLetters.findIndex((char) => char === guessLetters[letterIndex]);
+        const answerIdx = answerLetters.findIndex((char) => char === guessLetters[letterIndex]);
 
-    if (answerIdx > -1) {
-      score[letterIndex] = LetterValidationState.Almost;
+        if (answerIdx > -1) {
+            score[letterIndex] = LetterValidationState.Almost;
 
-      answerLetters[answerIdx] = LetterValidationState.Empty;
-    } else {
-      score[letterIndex] = LetterValidationState.Incorrect;
+            answerLetters[answerIdx] = LetterValidationState.Empty;
+        } else {
+            score[letterIndex] = LetterValidationState.Incorrect;
+        }
     }
-  }
 
-  return score;
+    return score;
 };
 
-export const validateGuess = (guess: string, game: Game) => {
-  if (!game.dictionary.includes(guess)) return false;
-  if (game.guesses.includes(guess)) return false;
+export const validateGuess = (guess: string, game: Game): boolean => {
+    if (!game.dictionary.includes(guess)) return false;
+    if (game.guesses.includes(guess)) return false;
 
-  if (game.guesses.length && game.hardMode) {
     const lastGuess = game.guesses[game.guesses.length - 1];
     const lastScore = game.scores[game.scores.length - 1];
 
-    for (let i = 0; i < guess.length; i++) {
-      if (lastScore[i] === LetterValidationState.Correct && lastGuess[i] !== guess[i]) {
-        return false;
-      }
-
-      if (lastScore[i] === LetterValidationState.Almost && !guess.includes(lastGuess[i])) {
-        return false;
-      }
+    if (game.hardMode && lastScore) {
+        for (let i = 0; i < lastScore.length; i++) {
+            if (lastScore[i] === LetterValidationState.Correct && guess[i] !== lastGuess[i]) {
+                return false;
+            }
+            if (lastScore[i] === LetterValidationState.Almost && !guess.includes(lastGuess[i])) {
+                return false;
+            }
+        }
     }
-  }
 
-  return true;
+    return true;
 };
 
-export const makeGuess = (guess: string, game: Game) => {
-  return {
-    ...game,
-    guesses: game.guesses.concat([guess]),
-    scores: game.scores.concat([scoreGuess(guess, game.answer)]),
-    guessesRemaining: guess === game.answer ? 0 : game.guessesRemaining === 0 ? 0 : game.guessesRemaining - 1,
-  };
+export const makeGuess = (guess: string, game: Game): Game => {
+    if (!validateGuess(guess, game)) {
+        throw new Error(guess + ' is an invalid guess');
+    }
+
+    return {
+        ...game,
+        guessesRemaining: game.answer === guess ? 0 : game.guessesRemaining === 0 ? 0 : game.guessesRemaining - 1,
+        guesses: game.guesses.concat([guess]),
+        scores: game.scores.concat([scoreGuess(guess, game.answer)]),
+    };
 };
