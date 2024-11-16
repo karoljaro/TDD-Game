@@ -1,11 +1,21 @@
+import type { Config } from 'tailwindcss'
+
 /** @type {import('tailwindcss').Config} */
-export default {
+export default <Partial<Config>> {
   content: [
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
   theme: {
-    extend: {},
+    extend: {
+      backgroundColor: {
+        "primary": "#141414"
+      },
+      borderColor: {
+        "primary": "#7E7E81",
+        "secondary": "#595959"
+      }
+    },
   },
   plugins: [],
 }
