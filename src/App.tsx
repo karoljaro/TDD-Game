@@ -3,20 +3,27 @@ import { useWrdl } from './hooks/useWrdl';
 
 function App() {
     const [game, guess, valid] = useWrdl();
+    console.log(game.answer)
 
-    console.log(valid)
-
-    const emptyRows = Array(game.guessesRemaining - 1).fill(0).map((_, idx) => 
-        <Guess key={idx} word={''} active={false} />
-    );
+    const emptyRows = Array(Math.max(0, game.guessesRemaining - 1))
+        .fill(0)
+        .map((_, index) => <Guess key={index} word={''.padStart(game.maxWordLength)} />);
 
     return (
-        <div className={'flex gap-3 flex-col min-h-screen w-full items-center justify-center bg-primary'}>
-            {game.guesses.map((guess, idx) => 
+        <div className={'flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-primary'}>
+            {game.guesses.map((guess, idx) => (
                 <Guess key={idx + guess} word={guess} score={game.scores[idx]} />
-            )}
-            <Guess word={guess} valid={valid} />
+            ))}
+
+            {game.guessesRemaining > 0 && <Guess key="guess" active valid={valid} word={guess.padEnd(game.maxWordLength)} />}
             {emptyRows}
+            {game.guessesRemaining === 0 && (
+                <div>
+                    <hr />
+                    <br />
+                    <Guess word={game.answer} score={Array(4).fill("C")} />
+                </div>
+            )}
         </div>
     );
 }

@@ -2,10 +2,8 @@ import { useCallback, useEffect, useState } from 'react';
 import * as Wrdl from '@/utils/wrdl';
 import { isLetter } from '@/helpers/isLetter';
 
-const words = ['tone', 'nice', 'cast', 'type'];
-
-export const useWrdl = (): [Wrdl.Game, string, boolean] => {
-    const [game, setGame] = useState(Wrdl.createGame(words, words[2], true));
+export const useWrdl = () => {
+    const [game, setGame] = useState(Wrdl.createGame());
     const [guess, _setGuess] = useState('');
     const [valid, _setValid] = useState(true);
 
@@ -13,29 +11,32 @@ export const useWrdl = (): [Wrdl.Game, string, boolean] => {
         (guess: string) => {
             _setGuess(guess);
             _setValid(guess.length !== game.maxWordLength || Wrdl.validateGuess(guess, game));
-            console.log(Wrdl.validateGuess(guess, game))
         },
-        [game]
+        [game],
     );
 
     const handleKeyDown = useCallback(
         (e: KeyboardEvent) => {
             const char: KeyboardEvent['key'] = e.key.toLowerCase();
 
-            if (char === 'enter') {
-                if (valid) {
-                    setGame(Wrdl.makeGuess(guess, game));
-                    setGuess('');
-                }
-            } else if (char === 'backspace') {
-                setGuess(guess.slice(0, -1));
-                return
-            } else if (isLetter(char) && guess.length < game.maxWordLength) {
-                setGuess(guess + char);
-                return;
+            switch (true) {
+                case char === 'enter':
+                    if (Wrdl.validateGuess(guess, game)) {
+                        setGame(Wrdl.makeGuess(guess, game));
+                        setGuess('');
+                    } else {
+                        setGuess(guess);
+                    }
+                    return;
+                case char === 'backspace':
+                    setGuess(guess.slice(0, -1));
+                    return;
+                case isLetter(char) && guess.length < game.maxWordLength:
+                    setGuess(guess + char);
+                    return;
             }
         },
-        [game, guess, setGuess, valid],
+        [game, guess, setGuess],
     );
 
     useEffect(() => {
@@ -43,5 +44,5 @@ export const useWrdl = (): [Wrdl.Game, string, boolean] => {
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [handleKeyDown]);
 
-    return [game, guess, valid];
+    return [game, guess, valid] as const;
 };

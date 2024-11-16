@@ -1,3 +1,5 @@
+import { getRandomNumber } from '@/helpers/randomNumber';
+import { words } from '@/models/exampleOfwords';
 import { LetterValidationState } from '@/types/enums';
 
 export type LetterScore_TYPE = Exclude<`${LetterValidationState}`, `${LetterValidationState.Empty}`>;
@@ -13,7 +15,9 @@ export type Game = {
     maxWordLength: number;
 };
 
-export const createGame = (dictionary: string[], answer: string, hardMode = false): Game => {
+export const getWord = () => words[getRandomNumber(0, words.length - 1)];
+
+export const createGame = (dictionary: string[] = words, answer: string = getWord(), hardMode = false): Game => {
     return {
         answer,
         hardMode,
@@ -85,6 +89,10 @@ export const validateGuess = (guess: string, game: Game): boolean => {
 };
 
 export const makeGuess = (guess: string, game: Game): Game => {
+    if (!validateGuess(guess, game)) {
+        throw new Error(guess + ' is an invalid guess');
+    }
+
     return {
         ...game,
         guessesRemaining: game.answer === guess ? 0 : game.guessesRemaining === 0 ? 0 : game.guessesRemaining - 1,
